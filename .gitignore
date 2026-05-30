@@ -1,0 +1,16 @@
+vault.enc
+salt.bin
+*.enc
+*.bin
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.env
+.DS_Store
+Thumbs.db
