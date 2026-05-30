@@ -113,7 +113,10 @@ Runtime files (`vault.enc`, `salt.bin`) are created on first run and are exclude
 
 ## Screenshots
 
-<!-- Add screenshots here after first run -->
+![Unlock Screen](screenshots/unlock.png)
+![All Entries](screenshots/entries.png)
+![Add Entry](screenshots/add_entry.png)
+![Generator](screenshots/generator.png) 
 
 ---
 
