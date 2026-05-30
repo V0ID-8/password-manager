@@ -119,7 +119,3 @@ Runtime files (`vault.enc`, `salt.bin`) are created on first run and are exclude
 | ![Add Entry](screenshots/add_entry.png) | ![Generator](screenshots/generator.png) |
 
 ---
-
-## License
-
-MIT
