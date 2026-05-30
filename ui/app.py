@@ -97,43 +97,64 @@ class MainFrame(ctk.CTkFrame):
         self.grid_columnconfigure(1, weight=1)
 
         # ---- Sidebar ----
-        sidebar = ctk.CTkFrame(self, width=200, corner_radius=0, fg_color="#1e1e2e")
+        sidebar = ctk.CTkFrame(self, width=210, corner_radius=0, fg_color="#13131f")
         sidebar.grid(row=0, column=0, sticky="nsew")
         sidebar.grid_propagate(False)
-        sidebar.grid_rowconfigure(10, weight=1)
+        # row 5 gets the stretch so bottom buttons stick to the bottom
+        sidebar.grid_rowconfigure(5, weight=1)
+        sidebar.grid_columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(
-            sidebar, text="🔐 CrypticRocket",
-            font=ctk.CTkFont(size=15, weight="bold"), text_color="#cdd6f4"
-        ).grid(row=0, column=0, padx=16, pady=(24, 20), sticky="w")
+        # Branding
+        brand = ctk.CTkFrame(sidebar, fg_color="transparent")
+        brand.grid(row=0, column=0, padx=16, pady=(22, 6), sticky="ew")
+        ctk.CTkLabel(brand, text="🔐", font=ctk.CTkFont(size=18)).pack(side="left")
+        ctk.CTkLabel(brand, text=" CrypticRocket",
+                     font=ctk.CTkFont(size=14, weight="bold"),
+                     text_color="#cdd6f4").pack(side="left")
 
+        # Thin separator under branding
+        ctk.CTkFrame(sidebar, height=1, fg_color="#232336", corner_radius=0).grid(
+            row=1, column=0, sticky="ew", padx=16, pady=(0, 10))
+
+        # Main nav buttons
         self._nav_btns: dict[str, ctk.CTkButton] = {}
         for i, (label, key) in enumerate(_NAV_ITEMS):
             btn = ctk.CTkButton(
                 sidebar, text=label, anchor="w",
-                height=38, corner_radius=8,
-                fg_color="transparent", hover_color="#313244",
+                height=40, corner_radius=8,
+                fg_color="transparent", hover_color="#252540",
+                text_color="#a6adc8",
                 font=ctk.CTkFont(size=13),
                 command=lambda k=key: self.show_view(k),
             )
-            btn.grid(row=i + 1, column=0, padx=10, pady=3, sticky="ew")
+            btn.grid(row=i + 2, column=0, padx=10, pady=2, sticky="ew")
             self._nav_btns[key] = btn
+
+        # row 5 is the spacer (weight=1 above) — bottom buttons go in rows 6,7,8
+
+        # Thin separator above bottom actions
+        ctk.CTkFrame(sidebar, height=1, fg_color="#232336", corner_radius=0).grid(
+            row=6, column=0, sticky="ew", padx=16, pady=(0, 6))
 
         ctk.CTkButton(
             sidebar, text="  Export / Import", anchor="w",
             height=38, corner_radius=8,
-            fg_color="transparent", hover_color="#313244",
-            font=ctk.CTkFont(size=13), text_color="#a6adc8",
+            fg_color="transparent", hover_color="#252540",
+            font=ctk.CTkFont(size=12), text_color="#585b70",
             command=self._open_export_import,
-        ).grid(row=10, column=0, padx=10, pady=3, sticky="ew")
+        ).grid(row=7, column=0, padx=10, pady=2, sticky="ew")
 
         ctk.CTkButton(
             sidebar, text="  Lock vault", anchor="w",
             height=38, corner_radius=8,
-            fg_color="transparent", hover_color="#313244",
-            font=ctk.CTkFont(size=13), text_color="#f38ba8",
+            fg_color="transparent", hover_color="#252540",
+            font=ctk.CTkFont(size=12), text_color="#f38ba8",
             command=on_lock,
-        ).grid(row=11, column=0, padx=10, pady=(0, 16), sticky="ew")
+        ).grid(row=8, column=0, padx=10, pady=(2, 16), sticky="ew")
+
+        # Sidebar vertical separator
+        ctk.CTkFrame(self, width=1, fg_color="#232336", corner_radius=0).grid(
+            row=0, column=0, sticky="nse")
 
         # ---- Content area ----
         self._content = ctk.CTkFrame(self, fg_color="#181825", corner_radius=0)
@@ -144,9 +165,11 @@ class MainFrame(ctk.CTkFrame):
         self.show_view("entries")
 
     def show_view(self, key: str):
-        # Highlight active nav button
         for k, btn in self._nav_btns.items():
-            btn.configure(fg_color="#313244" if k == key else "transparent")
+            if k == key:
+                btn.configure(fg_color="#252540", text_color="#cdd6f4")
+            else:
+                btn.configure(fg_color="transparent", text_color="#a6adc8")
 
         if self._active_view:
             self._active_view.destroy()
