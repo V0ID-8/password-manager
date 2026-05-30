@@ -1,8 +1,121 @@
-"""Add / Edit entry modal dialog."""
+"""Add / Edit entry — inline view and modal dialog."""
 import customtkinter as ctk
 from vault import Vault
 from generator import generate_password, password_strength
 from ui.widgets import StrengthMeter
+
+
+class AddEntryView(ctk.CTkFrame):
+    """Inline add-entry form rendered inside the main content area."""
+
+    def __init__(self, master, vault: Vault, on_navigate, **kwargs):
+        super().__init__(master, fg_color="#181825", **kwargs)
+        self._vault = vault
+        self._on_navigate = on_navigate
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        scroll = ctk.CTkScrollableFrame(self, fg_color="#181825", corner_radius=0)
+        scroll.grid(row=0, column=0, sticky="nsew")
+        scroll.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(scroll, text="Add Entry",
+                     font=ctk.CTkFont(size=22, weight="bold"),
+                     text_color="#cdd6f4").pack(padx=32, pady=(28, 4), anchor="w")
+        ctk.CTkLabel(scroll, text="Store a new credential in your vault.",
+                     font=ctk.CTkFont(size=13), text_color="#a6adc8").pack(
+            padx=32, anchor="w", pady=(0, 24))
+
+        card = ctk.CTkFrame(scroll, fg_color="#1e1e2e", corner_radius=12)
+        card.pack(fill="x", padx=32, pady=(0, 24))
+        card.grid_columnconfigure(0, weight=1)
+
+        def field(label, var, placeholder="", show=""):
+            ctk.CTkLabel(card, text=label, font=ctk.CTkFont(size=11),
+                         text_color="#a6adc8", anchor="w").pack(
+                fill="x", padx=24, pady=(16, 2))
+            e = ctk.CTkEntry(card, textvariable=var, placeholder_text=placeholder,
+                             show=show, height=38)
+            e.pack(fill="x", padx=24)
+            return e
+
+        self._service_var = ctk.StringVar()
+        self._user_var = ctk.StringVar()
+        self._url_var = ctk.StringVar()
+
+        field("Service *", self._service_var, "e.g. GitHub")
+        field("Username / Email *", self._user_var, "e.g. user@example.com")
+
+        ctk.CTkLabel(card, text="Password *", font=ctk.CTkFont(size=11),
+                     text_color="#a6adc8", anchor="w").pack(
+            fill="x", padx=24, pady=(16, 2))
+        pw_row = ctk.CTkFrame(card, fg_color="transparent")
+        pw_row.pack(fill="x", padx=24)
+
+        self._pw_var = ctk.StringVar()
+        self._pw_entry = ctk.CTkEntry(pw_row, textvariable=self._pw_var,
+                                      show="•", height=38)
+        self._pw_entry.pack(side="left", expand=True, fill="x")
+        ctk.CTkButton(pw_row, text="👁", width=38, height=38,
+                      fg_color="#313244", hover_color="#45475a",
+                      command=self._toggle_pw).pack(side="left", padx=(4, 0))
+        ctk.CTkButton(pw_row, text="Generate", width=80, height=38,
+                      fg_color="#313244", hover_color="#45475a",
+                      font=ctk.CTkFont(size=12),
+                      command=self._quick_generate).pack(side="left", padx=(4, 0))
+
+        self._strength_meter = StrengthMeter(card)
+        self._strength_meter.pack(fill="x", padx=24, pady=(4, 0))
+        self._pw_var.trace_add("write", self._update_strength)
+
+        field("URL", self._url_var, "https://")
+
+        ctk.CTkLabel(card, text="Notes", font=ctk.CTkFont(size=11),
+                     text_color="#a6adc8", anchor="w").pack(
+            fill="x", padx=24, pady=(16, 2))
+        self._notes_text = ctk.CTkTextbox(card, height=80, font=ctk.CTkFont(size=13))
+        self._notes_text.pack(fill="x", padx=24, pady=(0, 4))
+
+        self._error_label = ctk.CTkLabel(card, text="", font=ctk.CTkFont(size=12),
+                                          text_color="#f38ba8")
+        self._error_label.pack(padx=24, anchor="w")
+
+        btn_row = ctk.CTkFrame(card, fg_color="transparent")
+        btn_row.pack(fill="x", padx=24, pady=(8, 20))
+        ctk.CTkButton(btn_row, text="Cancel", width=90, height=38,
+                      fg_color="#45475a", hover_color="#585b70",
+                      command=lambda: on_navigate("entries")).pack(side="right", padx=(8, 0))
+        ctk.CTkButton(btn_row, text="Add entry", width=110, height=38,
+                      command=self._save).pack(side="right")
+
+    def _toggle_pw(self):
+        self._pw_entry.configure(show="" if self._pw_entry.cget("show") == "•" else "•")
+
+    def _quick_generate(self):
+        self._pw_var.set(generate_password(16))
+        self._pw_entry.configure(show="")
+
+    def _update_strength(self, *_):
+        score, label = password_strength(self._pw_var.get())
+        self._strength_meter.update_strength(score, label)
+
+    def _save(self):
+        service = self._service_var.get().strip()
+        username = self._user_var.get().strip()
+        password = self._pw_var.get()
+        url = self._url_var.get().strip()
+        notes = self._notes_text.get("1.0", "end-1c").strip()
+
+        if not service:
+            self._error_label.configure(text="Service name is required.")
+            return
+        if not password:
+            self._error_label.configure(text="Password is required.")
+            return
+
+        self._vault.add(service, username, password, url, notes)
+        self._on_navigate("entries")
 
 
 class AddDialog(ctk.CTkToplevel):

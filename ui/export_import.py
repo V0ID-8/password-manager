@@ -54,7 +54,7 @@ class ExportImportDialog(ctk.CTkToplevel):
             parent=self,
             defaultextension=".zip",
             filetypes=[("Zip archive", "*.zip")],
-            initialfile="crypticrocker_backup.zip",
+            initialfile="crypticroket_backup.zip",
         )
         if not path:
             return
@@ -117,6 +117,9 @@ class ExportImportDialog(ctk.CTkToplevel):
                 text="Import successful. Please re-lock and unlock to load the new vault.",
                 text_color="#2ecc71")
             if self._on_reimport:
-                self.after(1500, self._on_reimport)
+                def _finish():
+                    self.destroy()
+                    self._on_reimport()
+                self.after(1500, _finish)
         except Exception as e:
             self._status.configure(text=f"Import failed: {e}", text_color="#f38ba8")

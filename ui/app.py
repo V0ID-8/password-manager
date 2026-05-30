@@ -86,9 +86,11 @@ class MainFrame(ctk.CTkFrame):
         # Lazy imports here to avoid circular deps at module level
         from ui.entry_list import EntryListView
         from ui.generator_view import GeneratorView
+        from ui.add_dialog import AddEntryView
 
         self._view_classes = {
             "entries": EntryListView,
+            "add": AddEntryView,
             "generate": GeneratorView,
         }
         self._active_view: ctk.CTkFrame | None = None
@@ -173,11 +175,6 @@ class MainFrame(ctk.CTkFrame):
 
         if self._active_view:
             self._active_view.destroy()
-
-        if key == "add":
-            from ui.add_dialog import AddDialog
-            AddDialog(self, self._vault, on_save=lambda: self.show_view("entries"))
-            return
 
         cls = self._view_classes.get(key)
         if cls:

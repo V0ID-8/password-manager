@@ -113,12 +113,12 @@ class UnlockFrame(ctk.CTkFrame):
         btn_text = "Create vault" if is_first_run else "Unlock"
         self._unlock_btn = ctk.CTkButton(
             card, text=btn_text, height=46, corner_radius=10,
+            width=356,
             font=ctk.CTkFont(size=14, weight="bold"),
             fg_color="#3b4ede", hover_color="#4f5ef0",
             command=self._attempt_unlock,
         )
-        self._unlock_btn.place(relx=0.5, y=btn_y, anchor="n", relwidth=1,
-                               x=32, width=-64)
+        self._unlock_btn.place(relx=0.5, y=btn_y, anchor="n")
 
         # Security badge
         badge_y = card_height - 44
