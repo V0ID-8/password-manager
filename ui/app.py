@@ -120,6 +120,14 @@ class MainFrame(ctk.CTkFrame):
             self._nav_btns[key] = btn
 
         ctk.CTkButton(
+            sidebar, text="  Export / Import", anchor="w",
+            height=38, corner_radius=8,
+            fg_color="transparent", hover_color="#313244",
+            font=ctk.CTkFont(size=13), text_color="#a6adc8",
+            command=self._open_export_import,
+        ).grid(row=10, column=0, padx=10, pady=3, sticky="ew")
+
+        ctk.CTkButton(
             sidebar, text="  Lock vault", anchor="w",
             height=38, corner_radius=8,
             fg_color="transparent", hover_color="#313244",
@@ -154,3 +162,7 @@ class MainFrame(ctk.CTkFrame):
                        on_navigate=self.show_view)
             view.grid(row=0, column=0, sticky="nsew")
             self._active_view = view
+
+    def _open_export_import(self):
+        from ui.export_import import ExportImportDialog
+        ExportImportDialog(self, self._vault, on_reimport=self._on_lock)
